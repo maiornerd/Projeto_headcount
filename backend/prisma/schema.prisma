@@ -1,0 +1,116 @@
+// Conteúdo para o arquivo: /backend/prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+ url      = env("DATABASE_URL")
+ // url      = "postgresql://postgres:Al4n%24%21lv%40@localhost:5432/headcount_sgh?schema=public"
+}
+
+// 1. Tabela de Usuários e Autenticação
+model User {
+  id                    String    @id @default(uuid())
+  matricula             String    @unique // Login do usuário
+  nome                  String
+  email                 String    @unique
+  senha_hash            String
+  role_id               String
+  role                  Role      @relation(fields: [role_id], references: [id])
+  must_change_password  Boolean   @default(true)
+  created_at            DateTime  @default(now())
+  last_login            DateTime?
+  audit_logs            AuditLog[]
+  uploads               Upload[]
+
+  @@index([matricula])
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique // Ex: "Administrador", "Gerente"
+  permissions Json     // Ex: { "ver_tabela": true, "upload": false }
+  users       User[]
+}
+
+// 2. Tabela de Funcionários (Base de dados "Realizado")
+model Employee {
+  id              String    @id @default(uuid())
+  matricula       String    @unique
+  nome            String
+  data_nascimento DateTime
+  data_admissao   DateTime
+  funcao_codigo   String
+  funcao_desc     String
+  setor           String
+  jornada         Int
+  salario_hora    Decimal?
+  salario_atual   Decimal
+  escolaridade    String?
+  status          String    @default("ativo") // "ativo", "Férias", "Licença Maternidade", etc.
+
+  @@index([matricula])
+  @@index([funcao_codigo])
+  @@index([status])
+}
+
+// 3. Tabela Principal do Headcount (Orçado)
+model Headcount {
+  id              String    @id @default(uuid())
+  colig           String
+  cod_colig       String
+  empresa_hc      String
+  cod_sec_hc      String
+  cod_sec         String
+  gestor_area_hc  String
+  atividade_hc    String
+  desc_sec_hc     String
+  desc_area_rm    String
+  macro_area      String
+  cod_funcao      String
+  desc_funcao     String
+
+  // Armazena o orçado como JSON: { "03/2025": 10, "04/2025": 11 }
+  qtd_orc_historico Json
+
+  @@index([cod_colig])
+  @@index([cod_funcao])
+  @@index([macro_area])
+}
+
+// 4. Descrições de Cargo
+model JobDescription {
+  id            String    @id @default(uuid())
+  cod_funcao    String    @unique
+  titulo        String
+  conteudo_html String?
+  arquivo_url   String?
+  publicado_por String?
+  publicado_em  DateTime?
+}
+
+// 5. Histórico de Uploads
+model Upload {
+  id                String    @id @default(uuid())
+  filename          String
+  uploaded_by_id    String
+  uploaded_by       User      @relation(fields: [uploaded_by_id], references: [id])
+  uploaded_at       DateTime  @default(now())
+  status            String    // "Pendente", "Concluido", "Falha", "Revertido"
+  changes_summary   Json?
+  backup_reference  String?
+}
+
+// 6. Logs de Auditoria
+model AuditLog {
+  id            String    @id @default(uuid())
+  user_id       String
+  user          User      @relation(fields: [user_id], references: [id])
+  action        String    // "login", "create_user", "upload_headcount"
+  target_table  String?
+  target_id     String?
+  timestamp     DateTime  @default(now())
+  details       Json?
+}
