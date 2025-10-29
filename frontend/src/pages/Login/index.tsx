@@ -9,16 +9,22 @@ import {
   CircularProgress, 
   Alert 
 } from '@mui/material';
+import { useNavigate, Navigate } from 'react-router-dom';
 
 export function Login() {
   // Pega a função de 'login' do nosso "cofre" (AuthContext)
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   // Estados para controlar os campos do formulário
   const [matricula, setMatricula] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   // Função chamada ao clicar no botão "Entrar"
   const handleSubmit = async (event: React.FormEvent) => {
@@ -38,14 +44,13 @@ export function Login() {
       // Chama a função de login do "cofre"
       // O "cofre" vai chamar o "mensageiro" (Axios)
       // O "mensageiro" vai chamar o backend (localhost:3001)
-      await login(matricula, senha);
+      await login(matricula.trim(), senha.trim());
       // Se o login der certo, o AuthContext vai nos redirecionar (veremos isso no App.tsx)
-
+      navigate('/', { replace: true });
     } catch (err: any) {
       // Se o backend retornar um erro (ex: 401), o "cofre" joga o erro para cá
-      setError(err.message || 'Erro desconhecido ao tentar logar.');
-    } finally {
       setLoading(false);
+      setError(err.message || 'Erro desconhecido ao tentar logar.');
     }
   };
 
