@@ -150,5 +150,30 @@ export class AuthService { // [cite: 86]
     return userSemSenha; // [cite: 103]
   }
 
+  public async getUsers() {
+    const users = await prisma.user.findMany({
+      orderBy: {
+        nome: 'asc'
+      },
+      // Inclui a informação do 'Role' de cada utilizador
+      include: {
+        role: {
+          select: {
+            name: true
+          }
+        }
+      }
+    });
+
+    // Remove o hash da senha antes de enviar para o frontend
+    return users.map(user => {
+      const { senha_hash, ...userSemSenha } = user;
+      return {
+        ...userSemSenha,
+        id: user.id, // Garante que o ID está presente para o DataGrid
+        roleName: user.role ? user.role.name : 'Sem Role'
+      };
+    });
+  }
 
 } // <-- Este é o '}' final da classe AuthService

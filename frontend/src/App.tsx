@@ -1,39 +1,37 @@
 import type { ReactNode } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+
+// Nossas páginas
 import { Login } from './pages/Login';
-import { Box, Typography, Button } from '@mui/material';
+import { Dashboard } from './pages/Dashboard';
+import { MainLayout } from './components/MainLayout'; // Importa o layout
+import { UploadPage } from './pages/UploadPage';
+import { AdminPage } from './pages/AdminPage';
 
 /**
- * Um componente "Rota Protegida"
- * Verifica se o usuário está logado antes de deixar ele ver a página.
- * Se não estiver, redireciona para /login.
+ * Rota Protegida (Exatamente como antes)
+ * Se não está logado, manda para /login.
  */
-function ProtectedRoute({ children }: { children: ReactNode }) {
+function ProtectedRoute() {
   const { isAuthenticated } = useAuth();
-
-  if (!isAuthenticated) {
-    // Redireciona para o login
-    return <Navigate to="/login" replace />;
-  }
-
-  return children; // Mostra a página protegida
+  
+  // Se estiver logado, renderiza o Layout, que por sua vez renderiza a página
+  // O <Outlet /> dentro do MainLayout é onde as 'children' (Dashboard) vão entrar
+  return isAuthenticated ? <MainLayout /> : <Navigate to="/login" replace />;
 }
 
 /**
- * A página principal (Dashboard/Headcount) - Por enquanto, só um placeholder.
+ * Rota Pública com Redirecionamento (Exatamente como antes)
  */
-function Dashboard() {
-  const { user, logout } = useAuth();
-  return (
-    <Box sx={{ padding: 4 }}>
-      <Typography variant="h4">Página Principal (Headcount)</Typography>
-      <Typography>Olá, {user?.nome}!</Typography>
-      <Button variant="contained" onClick={logout} sx={{ mt: 2 }}>
-        Sair
-      </Button>
-    </Box>
-  );
+function RedirectIfAuth({ children }: { children: ReactNode }) {
+  const { isAuthenticated } = useAuth();
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
 }
 
 /**
@@ -43,20 +41,32 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Rota 1: A Página Principal ("/") */}
+        
+        {/* Rota 1: A Página de Login ("/login") */}
         <Route
-          path="/"
+          path="/login"
           element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
+            <RedirectIfAuth>
+              <Login />
+            </RedirectIfAuth>
           }
         />
 
-        {/* Rota 2: A Página de Login ("/login") */}
-        <Route path="/login" element={<Login />} />
+        {/* Rota 2: Rotas Protegidas (dentro do Layout) */}
+        <Route element={<ProtectedRoute />}>
+          {/* Todas as páginas aqui DENTRO usarão o MainLayout */}
+          
+          <Route path="/" element={<Dashboard />} />
 
-        {/* (Adicionaremos mais rotas aqui depois) */}
+          <Route path="/upload" element={<UploadPage />} />
+
+          <Route path="/admin" element={<AdminPage />} />
+          
+          {/* (Páginas futuras que vamos criar) */}
+          {/* <Route path="/headcount" element={<HeadcountPage />} /> */}
+          {/* <Route path="/upload" element={<UploadPage />} /> */}
+          {/* <Route path="/admin" element={<AdminPage />} /> */}
+        </Route>
 
       </Routes>
     </BrowserRouter>

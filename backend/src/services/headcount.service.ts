@@ -42,9 +42,8 @@ export class HeadcountService {
       realizadoMap.set(group.funcao_codigo, group._count.matricula);
     }
 
-    // --- 3. CONSTRUIR O 'WHERE' DINÂMICO (COM A CORREÇÃO) ---
+    // --- 3. CONSTRUIR O 'WHERE' DINÂMICO ---
     
-    // **** 👇 CORREÇÃO AQUI 👇 ****
     // Inicializa o 'where' principal como um objeto vazio
     const where: Prisma.HeadcountWhereInput = {};
 
@@ -66,8 +65,7 @@ export class HeadcountService {
     if (andConditions.length > 0) {
       where.AND = andConditions;
     }
-    // **** 👆 FIM DA CORREÇÃO 👆 ****
-
+    
     // Filtro de Busca Global (permanece igual)
     if (buscaGlobal) {
       where.OR = [
@@ -92,12 +90,21 @@ export class HeadcountService {
 
     // --- 5. JUNTAR ORÇADO + REALIZADO ---
     const resultadoFinal = orcadoData.map(linhaOrcado => {
-      const realizado = realizadoMap.get(linhaOrcado.cod_funcao) || 0;
+     const realizado = realizadoMap.get(linhaOrcado.cod_funcao) || 0;
+      
+      // Lógica do 'orcado' (baseada no seed)
+      // TODO: Melhorar esta lógica para ser dinâmica (pegar o mês atual)
+      const orcado = (linhaOrcado.qtd_orc_historico as any)['10/2025'] || 0;
+      const saldo = orcado - realizado;
+
       return {
-        ...linhaOrcado,
-        Realizado: realizado
-      };
-    });
+       ...linhaOrcado,
+        id: linhaOrcado.id, // Garante que o ID existe para o DataGrid
+        qtd_orc: orcado,
+        realizado: realizado, // padroniza para minúsculo
+        saldo: saldo,
+     };
+   });
 
     // --- 6. RETORNAR O NOVO OBJETO DE DADOS ---
     return {

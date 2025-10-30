@@ -1,5 +1,7 @@
+// Em: frontend/src/pages/Login/index.tsx
+
 import { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../context/AuthContext'; // Apenas useAuth
 import { 
   Container, 
   Box, 
@@ -9,28 +11,22 @@ import {
   CircularProgress, 
   Alert 
 } from '@mui/material';
-import { useNavigate, Navigate } from 'react-router-dom';
+// NENHUMA importação de 'react-router-dom' aqui
 
 export function Login() {
-  // Pega a função de 'login' do nosso "cofre" (AuthContext)
-  const { login, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
+  const { login } = useAuth(); // Apenas 'login' é necessário
 
-  // Estados para controlar os campos do formulário
+  // Estados (tudo igual)
   const [matricula, setMatricula] = useState('');
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
+
+  // NENHUM 'if (isAuthenticated)' aqui
 
   // Função chamada ao clicar no botão "Entrar"
   const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault(); // Impede o navegador de recarregar a página
-
-    console.log(`Enviando para o backend: [${matricula}] e [${senha}]`);
+    event.preventDefault(); 
 
     if (!matricula || !senha) {
       setError('Matrícula e senha são obrigatórios.');
@@ -41,28 +37,30 @@ export function Login() {
     setError(null);
 
     try {
-      // Chama a função de login do "cofre"
-      // O "cofre" vai chamar o "mensageiro" (Axios)
-      // O "mensageiro" vai chamar o backend (localhost:3001)
+      // Chama a função de login
       await login(matricula.trim(), senha.trim());
-      // Se o login der certo, o AuthContext vai nos redirecionar (veremos isso no App.tsx)
-      navigate('/', { replace: true });
+      
+      // SUCESSO!
+      // NÃO FAZEMOS NADA AQUI. App.tsx vai cuidar de tudo.
+
     } catch (err: any) {
-      // Se o backend retornar um erro (ex: 401), o "cofre" joga o erro para cá
+      // FALHA!
+      // Nós SÓ paramos o loading se o login FALHAR.
       setLoading(false);
-      setError(err.message || 'Erro desconhecido ao tentar logar.');
+      setError((err as Error).message || 'Erro desconhecido ao tentar logar.');
     }
   };
 
+  // O JSX do 'return (...)' permanece exatamente o mesmo
   return (
     <Container 
       component="main" 
-      maxWidth="xs" // Define um tamanho máximo pequeno (típico de login)
+      maxWidth="xs"
       sx={{ 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center', 
-        height: '100vh' // Centraliza verticalmente na tela
+        height: '100vh' 
       }}
     >
       <Box
@@ -71,12 +69,12 @@ export function Login() {
           flexDirection: 'column',
           alignItems: 'center',
           padding: 4,
-          backgroundColor: 'background.paper', // Usa a cor do tema
-          borderRadius: 2, // Bordas arredondadas
-          boxShadow: 3, // Sombra
+          backgroundColor: 'background.paper',
+          borderRadius: 2,
+          boxShadow: 3,
         }}
-        component="form" // Isso se torna uma tag <form>
-        onSubmit={handleSubmit} // Chama nossa função ao enviar
+        component="form"
+        onSubmit={handleSubmit}
       >
         <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold' }}>
           Controle de Headcount
@@ -105,7 +103,6 @@ export function Login() {
           onChange={(e) => setSenha(e.target.value)}
         />
 
-        {/* Mostra a mensagem de erro, se houver */}
         {error && (
           <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
             {error}
@@ -115,9 +112,9 @@ export function Login() {
         <Button
           type="submit"
           fullWidth
-          variant="contained" // Botão com fundo azul (do tema)
+          variant="contained"
           sx={{ mt: 3, mb: 2, padding: 1.5 }}
-          disabled={loading} // Desabilita o botão enquanto carrega
+          disabled={loading}
         >
           {loading ? <CircularProgress size={24} color="inherit" /> : 'Entrar'}
         </Button>

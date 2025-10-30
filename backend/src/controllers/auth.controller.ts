@@ -40,8 +40,6 @@ export class AuthController {
       return res.status(500).json({ message: 'Erro interno do servidor.' });
     }
   }
-
-  // (Futuramente, colocaremos aqui o 'changePassword', 'createUser', etc.)
   /**
    * Lida com a requisição de Troca de Senha
    */
@@ -91,6 +89,16 @@ export class AuthController {
          return res.status(400).json({ message: error.message });
       }
       // Outro erro
+      return res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+  }
+  
+  public async getUsers(req: Request, res: Response): Promise<Response> {
+    try {
+      const users = await authService.getUsers();
+      return res.status(200).json(users);
+    } catch (error: any) {
+      console.error('Erro ao buscar utilizadores:', error);
       return res.status(500).json({ message: 'Erro interno do servidor.' });
     }
   }

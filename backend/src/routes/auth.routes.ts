@@ -33,6 +33,13 @@ authRoutes.post(
   authController.createUser
 );
 
+authRoutes.get(
+  '/users',
+  ensureAuthenticated,
+  can('admin_geral'), // Ou 'criar_usuarios', ajuste a permissão
+  authController.getUsers
+);
+
 // GET /api/auth/roles (Lista Roles)
 authRoutes.get(
   '/roles',

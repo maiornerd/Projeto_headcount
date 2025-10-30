@@ -7,10 +7,10 @@ export class AdminController {
 
   public async getAuditLogs(req: Request, res: Response): Promise<Response> {
     try {
-      const page = parseInt(req.query.page as string || '1');
-      const pageSize = parseInt(req.query.pageSize as string || '10');
+     // const page = parseInt(req.query.page as string || '1');
+     // const pageSize = parseInt(req.query.pageSize as string || '10');
 
-      const logs = await auditService.getLogs(page, pageSize);
+      const logs = await auditService.getLogs(req.query);
 
       return res.status(200).json(logs);
 
