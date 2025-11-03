@@ -113,19 +113,22 @@ async function main() {
         cod_funcao: 'FIN-JR',
         titulo: 'Analista Financeiro Jr',
         conteudo_html: '<h1>Descrição - Analista Fin Jr</h1><p>Responsável por...</p>',
-        arquivo_url: '/files/FIN-JR.pdf'
+        arquivo_url: '/files/FIN-JR.pdf',
+        descricao_sumaria: 'Colocar argolas nas alças das peças manualmente, e realizar o arremate das peças de modo a efetuar o fechamento do lote que será recolhido e encaminhado para o Controle de Qualidade – CQ. Conferir as peças recebidas da bancada com as Ordens de Fabricação de Confecção – OFC, e dobrá-las para que sejam embaladas em sacos plásticos e/ou caixas etiquetadas a fim de realizar o correto direcionamento. Ao término das operações, retirar os tickets da régua de tickets referente ao trabalho que foi realizado, e assinar a fim de comprovar seu trabalho feito.'
       },
       {
         cod_funcao: 'FIN-PL',
         titulo: 'Analista Financeiro Pl',
         conteudo_html: '<h1>Descrição - Analista Fin Pl</h1><p>Responsável por...</p>',
-        arquivo_url: '/files/FIN-PL.pdf'
+        arquivo_url: '/files/FIN-PL.pdf',
+        descricao_sumaria: 'Descrição sumária do Analista Financeiro Pleno...' // Adicione um placeholder
       },
       {
         cod_funcao: 'TI-SR',
         titulo: 'Analista de TI Sênior',
         conteudo_html: '<h1>Descrição - Analista TI Sr</h1><p>Responsável por...</p>',
-        arquivo_url: '/files/TI-SR.pdf'
+        arquivo_url: '/files/TI-SR.pdf',
+        descricao_sumaria: 'Descrição sumária do Analista de TI Sênior...' // Adicione um placeholder
       }
     ]
   });

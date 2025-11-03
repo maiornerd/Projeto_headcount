@@ -1,55 +1,49 @@
-// Conteúdo para: src/controllers/job-description.controller.ts
-
 import type { Request, Response } from 'express';
-import { prisma } from '../prisma';
+import { JobDescriptionService } from '../services/job-description.service';
+
+const jdService = new JobDescriptionService();
 
 export class JobDescriptionController {
 
   /**
-   * Lista todas as descrições de cargo (paginado)
+   * Lida com a requisição de listar as descrições de cargo
    */
-  public async listDescriptions(req: Request, res: Response): Promise<Response> {
+  public async handleGetDescriptions(req: Request, res: Response): Promise<Response> {
     try {
-      const descriptions = await prisma.jobDescription.findMany({
-        select: {
-          id: true,
-          cod_funcao: true,
-          titulo: true,
-        }
-      });
-      return res.status(200).json(descriptions);
+      const data = await jdService.getDescriptions();
+      return res.status(200).json(data);
     } catch (error: any) {
-      return res.status(500).json({ message: error.message });
+      return res.status(500).json({ message: 'Erro ao buscar descrições de cargo.' });
     }
   }
 
   /**
-   * Busca UMA descrição de cargo (o conteúdo completo)
+   * Lida com o upload do PDF
    */
-  public async getDescription(req: Request, res: Response): Promise<Response> {
+  public async handleUploadDescription(req: Request, res: Response): Promise<Response> {
     try {
-      const { id } = req.params;
+      // 1. O 'cod_funcao' vem da URL (ex: /api/jd/upload/FIN-JR)
+      const { cod_funcao } = req.params;
 
-      // **** 👇 CORREÇÃO AQUI 👇 ****
-      // Verificação para garantir que o ID existe antes de usá-lo
-      if (!id) {
-        return res.status(400).json({ message: 'O ID da descrição é obrigatório na URL. Ex: /job-descriptions/seu-id-aqui' });
+      // 2. Verificação de segurança para o TypeScript
+      if (!cod_funcao) {
+        return res.status(400).json({ message: 'O "cod_funcao" é obrigatório na URL. Ex: /upload/FIN-JR' });
       }
-      // **** 👆 FIM DA CORREÇÃO 👆 ****
-
-      // Agora o TypeScript sabe que 'id' é 100% string
-      const description = await prisma.jobDescription.findUnique({
-        where: { id: id } // Esta linha agora é segura
-      });
-
-      if (!description) {
-        return res.status(404).json({ message: 'Descrição de cargo não encontrada.' });
-      }
-
-      // O frontend vai ler as permissões do usuário e decidir se mostra
-      // o 'conteudo_html' ou o 'arquivo_url'. O backend apenas entrega os dados.
-      return res.status(200).json(description);
       
+      // 2. O 'req.file' é injetado pelo Multer (que configuraremos na rota)
+      if (!req.file) {
+        return res.status(400).json({ message: 'Nenhum ficheiro PDF enviado.' });
+      }
+
+      // 3. Montamos o URL público (ex: /jd_pdfs/FIN-JR.pdf)
+      // (O nome do ficheiro é definido no multer.config.ts)
+      const publicUrl = `/jd_pdfs/${req.file.filename}`;
+
+      // 4. Salva o caminho no banco de dados
+      await jdService.updatePdfUrl(cod_funcao, publicUrl);
+
+      return res.status(200).json({ message: 'Upload concluído!', path: publicUrl });
+
     } catch (error: any) {
       return res.status(500).json({ message: error.message });
     }

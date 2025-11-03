@@ -6,6 +6,8 @@ import headcountRoutes from './routes/headcount.routes';
 import employeeRoutes from './routes/employee.routes';
 import adminRoutes from './routes/admin.routes';
 import jobDescRoutes from './routes/job-description.routes';
+import path from 'path'; // Importe o 'path'
+import jdRoutes from './routes/job-description.routes';
 
 // Carrega o dotenv assim que o app inicia (importante para o Prisma)
 import 'dotenv/config'; 
@@ -27,6 +29,8 @@ app.use('/api/headcount', headcountRoutes);
 app.use('/api/employee', employeeRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/job-descriptions', jobDescRoutes);
+app.use('/jd_pdfs', express.static(path.join(__dirname, '../uploads/jd_pdfs')));
+app.use('/api/jd', jdRoutes);
 
 // --- Rota de Teste ---
 // Vamos criar uma rota simples só para ver se o servidor está vivo

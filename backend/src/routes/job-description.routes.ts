@@ -1,31 +1,27 @@
-// Conteúdo para: src/routes/job-description.routes.ts
-
+// Em: backend/src/routes/job-description.routes.ts
 import { Router } from 'express';
 import { JobDescriptionController } from '../controllers/job-description.controller';
 import { ensureAuthenticated, can } from '../middleware/auth.middleware';
+import { uploadJDPdf } from '../config/multer.config';
 
-const jobDescController = new JobDescriptionController();
-const jobDescRoutes = Router();
+const jdController = new JobDescriptionController();
+const jdRoutes = Router();
 
-// GET /api/job-descriptions
-// Lista todas as descrições (requer 'ver_tabela')
-jobDescRoutes.get(
+// Rota 1: Listar todas as descrições (Todos os logados podem ver)
+jdRoutes.get(
   '/',
   ensureAuthenticated,
-  can('ver_tabela'),
-  jobDescController.listDescriptions
+  jdController.handleGetDescriptions
 );
 
-// GET /api/job-descriptions/:id
-// Vê uma descrição específica (requer 'ver_tabela')
-jobDescRoutes.get(
-  '/:id',
+// Rota 2: Fazer o upload de um PDF (Apenas Admin)
+// Usamos o 'cod_funcao' na URL para saber a qual cargo o PDF pertence
+jdRoutes.post(
+  '/upload/:cod_funcao',
   ensureAuthenticated,
-  can('ver_tabela'),
-  jobDescController.getDescription
+  can('admin_geral'), // Protegido!
+  uploadJDPdf.single('pdf'), // Usamos o import nomeado
+  jdController.handleUploadDescription
 );
 
-// (No futuro, podemos adicionar rotas POST, PUT, DELETE
-// protegidas por 'admin_geral' para gerenciar as descrições)
-
-export default jobDescRoutes;
+export default jdRoutes;

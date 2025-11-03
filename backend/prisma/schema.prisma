@@ -89,6 +89,7 @@ model JobDescription {
   arquivo_url   String?
   publicado_por String?
   publicado_em  DateTime?
+  descricao_sumaria String?
 }
 
 // 5. Histórico de Uploads

@@ -3,7 +3,7 @@
 import { Router } from 'express';
 import { HeadcountController } from '../controllers/headcount.controller';
 import { ensureAuthenticated, can } from '../middleware/auth.middleware';
-import { uploadConfig } from '../config/multer.config';
+import upload from '../config/multer.config';
 import { prisma } from '../prisma';
 
 const headcountController = new HeadcountController();
@@ -24,7 +24,7 @@ headcountRoutes.post(
   '/upload-preview',
   ensureAuthenticated,          // 1. Porteiro (Logado?)
   can('upload'),                // 2. Segurança VIP (Tem permissão de 'upload'?)
-  uploadConfig.single('file'),  // 3. Multer (Pega o arquivo do campo 'file')
+  upload.single('file'),  // 3. Multer (Pega o arquivo do campo 'file')
   headcountController.handleUploadPreview // 4. Controller
 );
 // Rota para confirmar o preview e salvar no banco

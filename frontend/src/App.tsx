@@ -8,6 +8,7 @@ import { Dashboard } from './pages/Dashboard';
 import { MainLayout } from './components/MainLayout'; // Importa o layout
 import { UploadPage } from './pages/UploadPage';
 import { AdminPage } from './pages/AdminPage';
+import { JobDescriptionPage } from './pages/JobDescriptionPage';
 
 /**
  * Rota Protegida (Exatamente como antes)
@@ -62,6 +63,8 @@ function App() {
 
           <Route path="/admin" element={<AdminPage />} />
           
+          <Route path="/job-descriptions" element={<JobDescriptionPage />} />
+
           {/* (Páginas futuras que vamos criar) */}
           {/* <Route path="/headcount" element={<HeadcountPage />} /> */}
           {/* <Route path="/upload" element={<UploadPage />} /> */}

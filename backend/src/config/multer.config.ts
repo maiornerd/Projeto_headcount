@@ -1,46 +1,67 @@
-// Conteúdo para: src/config/multer.config.ts
-
 import multer from 'multer';
-import path from 'path';
-import crypto from 'crypto';
+import * as path from 'path';
+import * as fs from 'fs'; // Para garantir que as pastas existem
 
-// Define o local de armazenamento
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    // 'uploads/' é a pasta na raiz do backend onde os arquivos ficarão
-    cb(null, 'uploads/');
+// --- 1. CONFIGURAÇÃO ANTIGA (Para Uploads de Headcount/Funcionários) ---
+// Esta configuração salva o ficheiro com um nome temporário na pasta 'uploads/'
+// (Isto é o que o seu 'headcount.service.ts' espera)
+
+const defaultStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadPath = 'uploads/';
+    fs.mkdirSync(uploadPath, { recursive: true }); // Garante que a pasta exista
+    cb(null, uploadPath);
   },
-  filename: (req, file, cb) => {
-    // Gera um nome de arquivo aleatório + nome original
-    crypto.randomBytes(16, (err, hash) => {
-      if (err) cb(err, file.originalname);
-
-      const fileName = `${hash.toString('hex')}-${file.originalname}`;
-      cb(null, fileName);
-    });
+  filename: function (req, file, cb) {
+    // Nome único temporário
+    cb(null, `${Date.now()}-${file.originalname}`);
   }
 });
 
-// Filtro de arquivos: Aceitar apenas Excel e CSV
-const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowedMimes = [
-    'application/vnd.ms-excel', // .xls
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-    'text/csv' // .csv
-  ];
+// Exporta o uploader padrão (para o headcount.routes.ts, se ele usar)
+export const uploadDefault = multer({ storage: defaultStorage });
 
-  if (allowedMimes.includes(file.mimetype)) {
+
+// --- 2. CONFIGURAÇÃO NOVA (Para PDFs de Descrição de Cargo) ---
+// Esta configuração salva o ficheiro na pasta 'uploads/jd_pdfs/'
+// com o nome baseado no 'cod_funcao' (ex: FIN-JR.pdf)
+
+const jdStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadPath = 'uploads/jd_pdfs/';
+    fs.mkdirSync(uploadPath, { recursive: true }); // Garante que a pasta exista
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    // O nome do ficheiro será o 'cod_funcao' vindo da URL + .pdf
+    // Ex: /api/jd/upload/FIN-JR -> o ficheiro será FIN-JR.pdf
+    const codFuncao = req.params.cod_funcao;
+    const fileExt = path.extname(file.originalname); // .pdf
+    
+    if (codFuncao) {
+      cb(null, `${codFuncao.toUpperCase()}${fileExt}`); // Garante maiúsculas
+    } else {
+      cb(new Error('cod_funcao não fornecido na URL'), '');
+    }
+  }
+});
+
+// Filtro de ficheiro (só aceita PDF)
+const pdfFileFilter = (req: any, file: any, cb: any) => {
+  if (file.mimetype === 'application/pdf') {
     cb(null, true);
   } else {
-    cb(new Error('Tipo de arquivo inválido. Apenas Excel (.xls, .xlsx) ou .csv são permitidos.'));
+    cb(new Error('Tipo de ficheiro inválido. Apenas PDFs são permitidos.'), false);
   }
 };
 
-// Exporta a configuração do Multer
-export const uploadConfig = multer({
-  storage: storage,
-  limits: {
-    fileSize: 1024 * 1024 * 10 // Limite de 10MB por arquivo
-  },
-  fileFilter: fileFilter
+// Exporta o novo uploader (nomeado)
+export const uploadJDPdf = multer({ 
+  storage: jdStorage,
+  fileFilter: pdfFileFilter
 });
+
+// --- 3. EXPORTAÇÃO PADRÃO ---
+// Mantemos uma exportação padrão (default) para compatibilidade com o 
+// seu 'headcount.routes.ts' existente.
+export default uploadDefault;
