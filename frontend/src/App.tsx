@@ -9,6 +9,7 @@ import { MainLayout } from './components/MainLayout'; // Importa o layout
 import { UploadPage } from './pages/UploadPage';
 import { AdminPage } from './pages/AdminPage';
 import { JobDescriptionPage } from './pages/JobDescriptionPage';
+import { AreaPage } from './pages/AreaPage';
 
 /**
  * Rota Protegida (Exatamente como antes)
@@ -29,7 +30,7 @@ function RedirectIfAuth({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();
 
   if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/headcount" replace />;
   }
 
   return children;
@@ -56,8 +57,13 @@ function App() {
         {/* Rota 2: Rotas Protegidas (dentro do Layout) */}
         <Route element={<ProtectedRoute />}>
           {/* Todas as páginas aqui DENTRO usarão o MainLayout */}
+
+          {/* Rota Raiz (agora redireciona) */}
+          <Route path="/" element={<Navigate to="/headcount" replace />} />
           
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/headcount" element={<Dashboard />} />
+
+          <Route path="/area" element={<AreaPage />} />
 
           <Route path="/upload" element={<UploadPage />} />
 

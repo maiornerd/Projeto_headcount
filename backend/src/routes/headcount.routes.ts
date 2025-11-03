@@ -64,4 +64,12 @@ headcountRoutes.post(
   can('admin_geral'), // Só Admin geral pode reverter
   headcountController.handleRollback
 );
+
+// GET /api/headcount/dashboard-data
+headcountRoutes.get(
+  '/dashboard-data',
+  ensureAuthenticated,
+  headcountController.getDashboardData
+);
+
 export default headcountRoutes;

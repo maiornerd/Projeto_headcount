@@ -363,4 +363,55 @@ export class HeadcountService {
 
     return { message: 'Rollback concluído. O banco de dados foi restaurado ao estado anterior.' };
   }
+
+  /**
+   * Agrega os dados de Orçado vs. Realizado para os gráficos
+   */
+  public async getDashboardData() {
+    
+    // --- 1. Calcular o Realizado (copiado do seu 'getHeadcountData') ---
+    const realizadoCounts = await prisma.employee.groupBy({
+      by: ['funcao_codigo'],
+      where: {
+        status: { in: ["ativo", "Férias", "Licença Maternidade"] }
+      },
+      _count: { matricula: true }
+    });
+    const realizadoMap = new Map<string, number>();
+    for (const group of realizadoCounts) {
+      realizadoMap.set(group.funcao_codigo, group._count.matricula);
+    }
+
+    // --- 2. Buscar TODOS os dados do Orçado ---
+    // (Não podemos usar 'groupBy' do Prisma porque o 'orcado' é um JSON)
+    const allHeadcountRows = await prisma.headcount.findMany();
+
+    // --- 3. Agregar os dados por Macro Área (em código) ---
+    const aggMap = new Map<string, { name: string, Orçado: number, Realizado: number }>();
+
+    for (const row of allHeadcountRows) {
+      const area = row.macro_area || 'Sem Área';
+      
+      // Lógica do Orçado (a mesma da sua tabela)
+      const orcado = (row.qtd_orc_historico as any)['10/2025'] || 0;
+      
+      // Lógica do Realizado
+      const realizado = realizadoMap.get(row.cod_funcao) || 0;
+
+      // Inicializa o mapa se a área for nova
+      if (!aggMap.has(area)) {
+        aggMap.set(area, { name: area, Orçado: 0, Realizado: 0 });
+      }
+
+      // Soma os valores
+      const current = aggMap.get(area)!;
+      current.Orçado += orcado;
+      current.Realizado += realizado;
+    }
+
+    // 4. Converte o Mapa para um Array (que o 'recharts' consegue ler)
+    // Ex: [ { name: 'FINANÇAS', Orçado: 4, Realizado: 3 }, ... ]
+    return Array.from(aggMap.values());
+  }
+
 }

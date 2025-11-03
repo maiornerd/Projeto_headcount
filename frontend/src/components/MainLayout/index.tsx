@@ -24,6 +24,7 @@ import UploadFileIcon from '@mui/icons-material/UploadFile'; // Upload
 import DescriptionIcon from '@mui/icons-material/Description'; // Descrição de Cargo
 import PeopleIcon from '@mui/icons-material/People'; // Administração
 import LogoutIcon from '@mui/icons-material/Logout'; // Sair
+import AssessmentIcon from '@mui/icons-material/Assessment';
 import MenuIcon from '@mui/icons-material/Menu'; // Ícone "Hamburguer"
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
@@ -123,9 +124,10 @@ export function MainLayout() {
   
   // Lista de itens do menu para evitar repetição
   const menuItems = [
-    { text: 'Headcount', icon: <DashboardIcon />, path: '/' },
+    { text: 'Headcount', icon: <DashboardIcon />, path: '/headcount' },
     { text: 'Upload', icon: <UploadFileIcon />, path: '/upload' },
     { text: 'Descrição de Cargo', icon: <DescriptionIcon />, path: '/job-descriptions' },
+    { text: 'Área (Dashboard)', icon: <AssessmentIcon />, path: '/area' },
     { text: 'Administração', icon: <PeopleIcon />, path: '/admin' },
   ];
 

@@ -103,5 +103,16 @@ export class HeadcountController {
       return res.status(500).json({ message: error.message });
     }
   }
-
+  /**
+   * Lida com a requisição de dados agregados para o dashboard
+   */
+  public async getDashboardData(req: Request, res: Response): Promise<Response> {
+    try {
+      const data = await headcountService.getDashboardData();
+      return res.status(200).json(data);
+    } catch (error: any) {
+      console.error('Erro ao buscar dados do dashboard:', error);
+      return res.status(500).json({ message: 'Erro interno do servidor.' });
+    }
+  }
 } // <- Este é o '}' de fechamento da classe HeadcountController
