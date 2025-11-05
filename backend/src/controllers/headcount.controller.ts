@@ -20,6 +20,7 @@ export class HeadcountController {
       return res.status(200).json(data);
 
     } catch (error: any) {
+      console.error('ERRO CRÍTICO AO BUSCAR HEADCOUNT:', error);
       return res.status(500).json({ message: 'Erro ao buscar dados de headcount.' });
     }
   }

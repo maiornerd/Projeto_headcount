@@ -49,7 +49,6 @@ export class AuthService { // [cite: 86]
     
     // **** 👇 LOG DE AUDITORIA 1 INSERIDO AQUI 👇 ****
     await auditService.log({ userId: user.id, action: 'login' });
-    // **** 👆 FIM DA INSERÇÃO 👆 ****
 
     return { // [cite: 91]
       token,
@@ -85,7 +84,7 @@ export class AuthService { // [cite: 86]
 
     // **** 👇 LOG DE AUDITORIA 2 INSERIDO AQUI 👇 ****
     await auditService.log({ userId: userId, action: 'change_password' });
-    // **** 👆 FIM DA INSERÇÃO 👆 ****
+
 
     return { message: 'Senha alterada com sucesso.' }; // [cite: 95]
   }
@@ -136,7 +135,6 @@ export class AuthService { // [cite: 86]
     // 5. Retorna o usuário criado (sem a senha)
     const { senha_hash: _, ...userSemSenha } = newUser; // [cite: 102]
 
-    // **** 👇 LOG DE AUDITORIA 3 INSERIDO AQUI 👇 ****
     // (Idealmente, o 'userId' seria do admin, mas vamos usar o do usuário criado)
     await auditService.log({
       userId: newUser.id,
@@ -176,4 +174,4 @@ export class AuthService { // [cite: 86]
     });
   }
 
-} // <-- Este é o '}' final da classe AuthService
+}
